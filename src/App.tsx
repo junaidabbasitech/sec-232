@@ -264,8 +264,8 @@ export default function App() {
         const matchesSearch = 
           itemCode.includes(query) ||
           item.description.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesAnnex = selectedAnnex === 'All' || item.annex === selectedAnnex;
-        const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
+        const matchesAnnex = sidebarTab === 'dashboard' || selectedAnnex === 'All' || item.annex === selectedAnnex;
+        const matchesCategory = sidebarTab === 'dashboard' || selectedCategory === 'All' || item.category === selectedCategory;
         return matchesSearch && matchesAnnex && matchesCategory;
       })
       .sort((a, b) => {
@@ -479,7 +479,7 @@ export default function App() {
             My Highlights
           </button>
 
-          {(sidebarTab === 'dashboard' || sidebarTab === 'master-data') && (
+          {sidebarTab === 'master-data' && (
             <>
               <div className="px-4 mt-6 mb-2 text-[10px] uppercase tracking-widest text-text-dim font-bold">Advanced Filters</div>
               

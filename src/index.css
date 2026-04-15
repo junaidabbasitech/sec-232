@@ -5,31 +5,76 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-serif: "Times New Roman", Times, serif;
-  
+
+  /* Core tokens */
   --color-bg-primary: var(--bg-primary);
   --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+
   --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+
   --color-text-main: var(--text-main);
   --color-text-dim: var(--text-dim);
+  --color-text-muted: var(--text-muted);
+
   --color-border-theme: var(--border-theme);
+  --color-border-soft: var(--border-soft);
+
+  /* Semantic */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
 }
 
+/* ================= DARK (DEFAULT) ================= */
 :root {
-  --bg-primary: #0F172A;
-  --bg-secondary: #1E293B;
-  --accent: #38BDF8;
-  --text-main: #F8FAFC;
-  --text-dim: #94A3B8;
-  --border-theme: #334155;
+  /* Backgrounds (layered depth) */
+  --bg-primary: #0B1220;     /* deeper than before */
+  --bg-secondary: #111827;   /* main surfaces */
+  --bg-tertiary: #1F2937;    /* cards, hover surfaces */
+
+  /* Accent (modern blue with depth) */
+  --accent: #3B82F6;
+  --accent-hover: #2563EB;
+  --accent-soft: rgba(59, 130, 246, 0.15);
+
+  /* Text hierarchy */
+  --text-main: #F9FAFB;
+  --text-dim: #9CA3AF;
+  --text-muted: #6B7280;
+
+  /* Borders */
+  --border-theme: #1F2937;
+  --border-soft: #374151;
+
+  /* Semantic colors */
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
 }
 
+/* ================= LIGHT ================= */
 :root.light {
   --bg-primary: #FFFFFF;
-  --bg-secondary: #F8FAFC;
-  --accent: #0EA5E9;
+  --bg-secondary: #F9FAFB;
+  --bg-tertiary: #F3F4F6;
+
+  --accent: #2563EB;
+  --accent-hover: #1D4ED8;
+  --accent-soft: rgba(37, 99, 235, 0.1);
+
   --text-main: #0F172A;
   --text-dim: #475569;
-  --border-theme: #E2E8F0;
+  --text-muted: #64748B;
+
+  --border-theme: #E5E7EB;
+  --border-soft: #CBD5F5;
+
+  --success: #16A34A;
+  --warning: #D97706;
+  --danger: #DC2626;
 }
 
 @layer base {
@@ -38,19 +83,22 @@
   }
 }
 
+/* ================= TYPOGRAPHY ================= */
 .document-view {
   font-family: var(--font-serif);
   font-variant-numeric: tabular-nums;
 }
 
+/* ================= CURSOR ================= */
 .cursor-pen {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19l7-7 3 3-7 7-3-3z'%3E%3C/path%3E%3Cpath d='M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z'%3E%3C/path%3E%3Cpath d='M2 2l5 5'%3E%3C/path%3E%3Cpath d='M11 11l1 1'%3E%3C/path%3E%3C/svg%3E") 0 24, auto;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19l7-7 3 3-7 7-3-3z'/%3E%3Cpath d='M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z'/%3E%3Cpath d='M2 2l5 5'/%3E%3Cpath d='M11 11l1 1'/%3E%3C/svg%3E") 0 24, auto;
 }
 
 .dark .cursor-pen {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19l7-7 3 3-7 7-3-3z'%3E%3C/path%3E%3Cpath d='M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z'%3E%3C/path%3E%3Cpath d='M2 2l5 5'%3E%3C/path%3E%3Cpath d='M11 11l1 1'%3E%3C/path%3E%3C/svg%3E") 0 24, auto;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19l7-7 3 3-7 7-3-3z'/%3E%3Cpath d='M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z'/%3E%3Cpath d='M2 2l5 5'/%3E%3Cpath d='M11 11l1 1'/%3E%3C/svg%3E") 0 24, auto;
 }
 
+/* ================= SCROLLBAR ================= */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -60,9 +108,10 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-border-theme rounded-full;
+  background-color: var(--border-soft);
+  border-radius: 9999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  @apply bg-text-dim;
+  background-color: var(--text-muted);
 }
