@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo, useEffect, useRef, type ChangeEvent, type JSX, type MouseEvent, type ReactNode } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Search, 
   Filter, 
@@ -47,7 +47,7 @@ interface UserHighlight {
   createdAt: number;
 }
 
-export default function App(): JSX.Element {
+export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [theme, setTheme] = useState<Theme>('dark');
   const [selectedAnnex, setSelectedAnnex] = useState<string>('All');
@@ -115,8 +115,11 @@ export default function App(): JSX.Element {
 
   // Sync theme with document class
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    document.documentElement.classList.toggle('light', theme === 'light');
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, [theme]);
 
   // Auto-scroll to highlighted code
@@ -345,10 +348,10 @@ export default function App(): JSX.Element {
           const userH = userHighlights.find(h => h.text.toLowerCase() === lowerPart);
           if (userH) {
             return (
-              <span key={i} className="relative group/highlight inline-flex items-center">
+              <span key={i} className="relative group/highlight inline">
                 <mark 
                   style={{ backgroundColor: userH.color }}
-                  className="rounded-sm px-0.5 text-slate-900 cursor-pointer transition duration-150 ease-in-out group-hover/highlight:-translate-y-0.5 group-hover/highlight:shadow-[0_0_0_4px_rgba(59,130,246,0.14)]"
+                  className="rounded-sm px-0.5 text-slate-900 cursor-help"
                 >
                   {part}
                 </mark>
@@ -362,7 +365,7 @@ export default function App(): JSX.Element {
                 )}
                 <button 
                   onClick={(e) => { e.stopPropagation(); setEditingHighlight(userH); }}
-                  className="absolute -top-2 -right-2 w-4 h-4 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 opacity-0 group-hover/highlight:opacity-100 group-hover/highlight:scale-105 hover:text-accent transition-all shadow-sm z-10"
+                  className="absolute -top-2 -right-2 w-4 h-4 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-accent opacity-0 group-hover/highlight:opacity-100 transition-all shadow-sm z-10"
                 >
                   <Edit3 size={8} />
                 </button>
@@ -376,7 +379,7 @@ export default function App(): JSX.Element {
     );
   };
 
-  const handleDocHover = (e: MouseEvent<HTMLDivElement>, line: string) => {
+  const handleDocHover = (e: React.MouseEvent, line: string) => {
     const htsMatch = line.match(/\d{4}(\.\d{2}){0,2}(\.\d{4})?/);
     if (htsMatch) {
       const code = htsMatch[0];
