@@ -6,12 +6,30 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-serif: "Times New Roman", Times, serif;
   
-  --color-bg-primary: #0F172A;
-  --color-bg-secondary: #1E293B;
-  --color-accent: #38BDF8;
-  --color-text-main: #F8FAFC;
-  --color-text-dim: #94A3B8;
-  --color-border-theme: #334155;
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-accent: var(--accent);
+  --color-text-main: var(--text-main);
+  --color-text-dim: var(--text-dim);
+  --color-border-theme: var(--border-theme);
+}
+
+:root {
+  --bg-primary: #0F172A;
+  --bg-secondary: #1E293B;
+  --accent: #38BDF8;
+  --text-main: #F8FAFC;
+  --text-dim: #94A3B8;
+  --border-theme: #334155;
+}
+
+:root.light {
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F8FAFC;
+  --accent: #0EA5E9;
+  --text-main: #0F172A;
+  --text-dim: #475569;
+  --border-theme: #E2E8F0;
 }
 
 @layer base {
@@ -23,6 +41,14 @@
 .document-view {
   font-family: var(--font-serif);
   font-variant-numeric: tabular-nums;
+}
+
+.cursor-pen {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19l7-7 3 3-7 7-3-3z'%3E%3C/path%3E%3Cpath d='M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z'%3E%3C/path%3E%3Cpath d='M2 2l5 5'%3E%3C/path%3E%3Cpath d='M11 11l1 1'%3E%3C/path%3E%3C/svg%3E") 0 24, auto;
+}
+
+.dark .cursor-pen {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19l7-7 3 3-7 7-3-3z'%3E%3C/path%3E%3Cpath d='M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z'%3E%3C/path%3E%3Cpath d='M2 2l5 5'%3E%3C/path%3E%3Cpath d='M11 11l1 1'%3E%3C/path%3E%3C/svg%3E") 0 24, auto;
 }
 
 .custom-scrollbar::-webkit-scrollbar {

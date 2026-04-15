@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, type ChangeEvent, type JSX, type MouseEvent, type ReactNode } from 'react';
 import { 
   Search, 
   Filter, 
@@ -25,7 +25,11 @@ import {
   Highlighter,
   Trash2,
   Layers,
-  Percent
+  Percent,
+  MessageSquare,
+  Edit3,
+  StickyNote,
+  Database
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { htsData } from './data/htsData';
@@ -39,9 +43,11 @@ interface UserHighlight {
   id: string;
   text: string;
   color: string;
+  annotation?: string;
+  createdAt: number;
 }
 
-export default function App() {
+export default function App(): JSX.Element {
   const [searchQuery, setSearchQuery] = useState('');
   const [theme, setTheme] = useState<Theme>('dark');
   const [selectedAnnex, setSelectedAnnex] = useState<string>('All');
@@ -51,7 +57,7 @@ export default function App() {
   const [zoom, setZoom] = useState(100);
   const [viewMode, setViewMode] = useState<'grid' | 'document'>('grid');
   const [highlightedCode, setHighlightedCode] = useState<string | null>(null);
-  const [showHighlights, setShowHighlights] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<'dashboard' | 'master-data' | 'key-highlights' | 'my-highlights'>('dashboard');
   const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
   const [selectedItem, setSelectedItem] = useState<HTSItem | null>(null);
   const [userHighlights, setUserHighlights] = useState<UserHighlight[]>(() => {
@@ -59,22 +65,58 @@ export default function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [highlighterColor, setHighlighterColor] = useState('#fbbf24'); // Default yellow
+  const [isHighlighterMode, setIsHighlighterMode] = useState(false);
+  const [editingHighlight, setEditingHighlight] = useState<UserHighlight | null>(null);
+  const [highlightFilter, setHighlightFilter] = useState<string>('All');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [showClearAllConfirm, setShowClearAllConfirm] = useState(false);
   
   const docContainerRef = useRef<HTMLDivElement>(null);
   const lineRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
-  // Persist highlights
+  // Auto-save highlights every 30 seconds
   useEffect(() => {
-    localStorage.setItem('hts_user_highlights', JSON.stringify(userHighlights));
+    const interval = setInterval(() => {
+      localStorage.setItem('hts_user_highlights', JSON.stringify(userHighlights));
+      console.log('Auto-saved highlights');
+    }, 30000);
+    return () => clearInterval(interval);
   }, [userHighlights]);
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Zoom: Ctrl/Cmd + +/-
+      if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
+        e.preventDefault();
+        handleZoomIn();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+        e.preventDefault();
+        handleZoomOut();
+      }
+
+      // Highlighter Mode: H (if not typing in input)
+      if (e.key.toLowerCase() === 'h' && !(e.target instanceof HTMLInputElement)) {
+        setIsHighlighterMode(prev => !prev);
+      }
+
+      // Sidebar Tabs: Ctrl/Cmd + 1-4
+      if ((e.ctrlKey || e.metaKey) && ['1', '2', '3', '4'].includes(e.key)) {
+        e.preventDefault();
+        const tabs: ('dashboard' | 'master-data' | 'key-highlights' | 'my-highlights')[] = ['dashboard', 'master-data', 'key-highlights', 'my-highlights'];
+        setSidebarTab(tabs[parseInt(e.key) - 1]);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [zoom, sidebarTab]);
 
   // Sync theme with document class
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.classList.toggle('light', theme === 'light');
   }, [theme]);
 
   // Auto-scroll to highlighted code
@@ -144,7 +186,7 @@ export default function App() {
     } else if (htsListMatch && line.trim().length > 0) {
       const codes = line.trim().split(/\s+/);
       return (
-        <div key={i} className="grid grid-cols-4 md:grid-cols-6 gap-2 py-3 px-4 bg-slate-50/50 rounded-lg my-1">
+        <div key={i} className="grid grid-cols-4 md:grid-cols-6 gap-2 py-3 px-4 bg-slate-50 rounded-lg my-1 border border-slate-200">
           {codes.map((code, idx) => (
             <button
               key={idx}
@@ -170,13 +212,13 @@ export default function App() {
       return (
         <div 
           key={i} 
-          ref={el => lineRefs.current[i] = el}
+          ref={el => { lineRefs.current[i] = el; }}
           onMouseMove={(e) => handleDocHover(e, line)}
           onMouseLeave={() => setTooltip(null)}
           onClick={() => handleCodeClick(code)}
           className={cn(
             "grid grid-cols-[120px_1fr] gap-4 py-2 px-4 border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer group",
-            isHighlighted && "bg-yellow-100 border-l-4 border-yellow-400 -mx-4"
+            isHighlighted && "bg-accent/10 border-l-4 border-accent -mx-4"
           )}
         >
           <span className="font-mono font-bold text-slate-900 group-hover:text-accent">{code}</span>
@@ -190,7 +232,7 @@ export default function App() {
       return (
         <div 
           key={i} 
-          ref={el => lineRefs.current[i] = el}
+          ref={el => { lineRefs.current[i] = el; }}
           className="mt-8 mb-4 px-4 py-3 bg-slate-900 text-white rounded-lg font-bold uppercase tracking-widest text-[10px] shadow-sm"
         >
           {line}
@@ -201,12 +243,12 @@ export default function App() {
     return (
       <div 
         key={i} 
-        ref={el => lineRefs.current[i] = el}
+        ref={el => { lineRefs.current[i] = el; }}
         onMouseMove={(e) => handleDocHover(e, line)}
         onMouseLeave={() => setTooltip(null)}
         className={cn(
-          "py-2 px-4 text-slate-700 leading-relaxed text-sm",
-          isHighlighted && "bg-yellow-100 border-l-4 border-yellow-400 -mx-4"
+          "py-2 px-4 text-slate-700 leading-relaxed text-sm transition-colors",
+          isHighlighted && "bg-accent/10 border-l-4 border-accent -mx-4"
         )}
       >
         {highlightText(line, highlightedCode || '', true)}
@@ -215,6 +257,9 @@ export default function App() {
   };
 
   const filteredData = useMemo(() => {
+    // If in dashboard, only show results if searching
+    if (sidebarTab === 'dashboard' && !searchQuery.trim()) return [];
+
     return htsData
       .filter(item => {
         const query = searchQuery.toLowerCase().replace(/\./g, '');
@@ -231,7 +276,7 @@ export default function App() {
         if (sortBy === 'code') return a.code.localeCompare(b.code);
         return a.description.localeCompare(b.description);
       });
-  }, [searchQuery, selectedAnnex, selectedCategory, selectedDuty, sortBy]);
+  }, [searchQuery, selectedAnnex, selectedCategory, selectedDuty, sortBy, sidebarTab]);
 
   const handleReset = () => {
     setSearchQuery('');
@@ -240,7 +285,7 @@ export default function App() {
     setSelectedDuty('All');
     setSortBy('code');
     setHighlightedCode(null);
-    setShowHighlights(false);
+    setSidebarTab('dashboard');
     setZoom(100);
     setUserHighlights([]);
   };
@@ -253,11 +298,14 @@ export default function App() {
     if (selection && selection.toString().trim().length > 0) {
       const text = selection.toString().trim();
       if (!userHighlights.some(h => h.text === text)) {
-        setUserHighlights(prev => [...prev, {
+        const newHighlight: UserHighlight = {
           id: Math.random().toString(36).substr(2, 9),
           text,
-          color: highlighterColor
-        }]);
+          color: highlighterColor,
+          createdAt: Date.now()
+        };
+        setUserHighlights(prev => [...prev, newHighlight]);
+        setEditingHighlight(newHighlight);
       }
       selection.removeAllRanges();
     }
@@ -297,13 +345,28 @@ export default function App() {
           const userH = userHighlights.find(h => h.text.toLowerCase() === lowerPart);
           if (userH) {
             return (
-              <mark 
-                key={i} 
-                style={{ backgroundColor: userH.color }}
-                className="rounded-sm px-0.5 text-slate-900"
-              >
-                {part}
-              </mark>
+              <span key={i} className="relative group/highlight inline-flex items-center">
+                <mark 
+                  style={{ backgroundColor: userH.color }}
+                  className="rounded-sm px-0.5 text-slate-900 cursor-pointer transition duration-150 ease-in-out group-hover/highlight:-translate-y-0.5 group-hover/highlight:shadow-[0_0_0_4px_rgba(59,130,246,0.14)]"
+                >
+                  {part}
+                </mark>
+                {userH.annotation && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-slate-900 text-white text-[10px] p-2 rounded shadow-xl opacity-0 group-hover/highlight:opacity-100 transition-opacity pointer-events-none z-50">
+                    <div className="flex items-center gap-1 mb-1 text-accent font-bold uppercase tracking-tighter">
+                      <StickyNote size={10} /> Note
+                    </div>
+                    {userH.annotation}
+                  </div>
+                )}
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setEditingHighlight(userH); }}
+                  className="absolute -top-2 -right-2 w-4 h-4 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 opacity-0 group-hover/highlight:opacity-100 group-hover/highlight:scale-105 hover:text-accent transition-all shadow-sm z-10"
+                >
+                  <Edit3 size={8} />
+                </button>
+              </span>
             );
           }
 
@@ -313,7 +376,7 @@ export default function App() {
     );
   };
 
-  const handleDocHover = (e: React.MouseEvent, line: string) => {
+  const handleDocHover = (e: MouseEvent<HTMLDivElement>, line: string) => {
     const htsMatch = line.match(/\d{4}(\.\d{2}){0,2}(\.\d{4})?/);
     if (htsMatch) {
       const code = htsMatch[0];
@@ -331,6 +394,19 @@ export default function App() {
   };
 
   const handleCodeClick = (code: string) => {
+    if (isHighlighterMode) {
+      if (!userHighlights.some(h => h.text === code)) {
+        const newHighlight: UserHighlight = {
+          id: Math.random().toString(36).substr(2, 9),
+          text: code,
+          color: highlighterColor,
+          createdAt: Date.now()
+        };
+        setUserHighlights(prev => [...prev, newHighlight]);
+        setEditingHighlight(newHighlight);
+      }
+      return;
+    }
     const item = htsData.find(i => i.code === code);
     if (item) {
       setSelectedItem(item);
@@ -365,109 +441,233 @@ export default function App() {
         <nav className="flex-1 py-4 overflow-y-auto custom-scrollbar">
           <div className="px-4 mb-2 text-[10px] uppercase tracking-widest text-text-dim font-bold">Main</div>
           <button 
-            onClick={() => { setSelectedAnnex('All'); setSelectedCategory('All'); setSelectedDuty('All'); setShowHighlights(false); }}
+            onClick={() => { setSidebarTab('dashboard'); setHighlightedCode(null); }}
             className={cn(
               "w-full px-6 py-3 text-sm flex items-center gap-3 transition-all",
-              !showHighlights && selectedAnnex === 'All' && selectedCategory === 'All' && selectedDuty === 'All' ? "text-text-main bg-white/5 border-l-4 border-accent" : "text-text-dim hover:text-text-main hover:bg-white/5"
+              sidebarTab === 'dashboard' ? "text-text-main bg-white/5 border-l-4 border-accent" : "text-text-dim hover:text-text-main hover:bg-white/5"
             )}
           >
             <LayoutGrid size={18} />
             Dashboard
           </button>
-          
+
           <button 
-            onClick={() => setShowHighlights(true)}
+            onClick={() => { setSidebarTab('master-data'); setHighlightedCode(null); }}
             className={cn(
               "w-full px-6 py-3 text-sm flex items-center gap-3 transition-all",
-              showHighlights ? "text-text-main bg-white/5 border-l-4 border-accent" : "text-text-dim hover:text-text-main hover:bg-white/5"
+              sidebarTab === 'master-data' ? "text-text-main bg-white/5 border-l-4 border-accent" : "text-text-dim hover:text-text-main hover:bg-white/5"
+            )}
+          >
+            <Database size={18} />
+            Master Data
+          </button>
+          
+          <button 
+            onClick={() => setSidebarTab('key-highlights')}
+            className={cn(
+              "w-full px-6 py-3 text-sm flex items-center gap-3 transition-all",
+              sidebarTab === 'key-highlights' ? "text-text-main bg-white/5 border-l-4 border-accent" : "text-text-dim hover:text-text-main hover:bg-white/5"
             )}
           >
             <BookOpen size={18} />
             Key Highlights
           </button>
 
-          <div className="px-4 mt-6 mb-2 text-[10px] uppercase tracking-widest text-text-dim font-bold">Advanced Filters</div>
-          
-          {/* Annex Filter */}
-          <div className="px-6 py-2 space-y-2">
-            <label className="text-[10px] text-text-dim font-bold flex items-center gap-2 uppercase tracking-widest">
-              <FileText size={12} className="text-accent" /> Annex
-            </label>
-            <div className="relative">
-              <select 
-                value={selectedAnnex}
-                onChange={(e) => setSelectedAnnex(e.target.value)}
-                className="w-full bg-bg-primary border border-border-theme rounded-lg px-3 py-2 text-xs outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all appearance-none cursor-pointer"
-              >
-                {annexes.map(a => <option key={a} value={a} className="bg-bg-secondary">{a}</option>)}
-              </select>
-              <ChevronRight size={12} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-text-dim pointer-events-none" />
-            </div>
-          </div>
+          <button 
+            onClick={() => setSidebarTab('my-highlights')}
+            className={cn(
+              "w-full px-6 py-3 text-sm flex items-center gap-3 transition-all",
+              sidebarTab === 'my-highlights' ? "text-text-main bg-white/5 border-l-4 border-accent" : "text-text-dim hover:text-text-main hover:bg-white/5"
+            )}
+          >
+            <Highlighter size={18} />
+            My Highlights
+          </button>
 
-          {/* Category Filter */}
-          <div className="px-6 py-2 space-y-2">
-            <label className="text-[10px] text-text-dim font-bold flex items-center gap-2 uppercase tracking-widest">
-              <Layers size={12} className="text-accent" /> Category
-            </label>
-            <div className="relative">
-              <select 
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full bg-bg-primary border border-border-theme rounded-lg px-3 py-2 text-xs outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all appearance-none cursor-pointer"
-              >
-                {categories.map(c => <option key={c} value={c} className="bg-bg-secondary">{c}</option>)}
-              </select>
-              <ChevronRight size={12} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-text-dim pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Duty Rate Filter */}
-          <div className="px-6 py-2 space-y-2">
-            <label className="text-[10px] text-text-dim font-bold flex items-center gap-2 uppercase tracking-widest">
-              <Percent size={12} className="text-accent" /> Duty Rate
-            </label>
-            <div className="relative">
-              <select 
-                value={selectedDuty}
-                onChange={(e) => setSelectedDuty(e.target.value)}
-                className="w-full bg-bg-primary border border-border-theme rounded-lg px-3 py-2 text-xs outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all appearance-none cursor-pointer"
-              >
-                {dutyRates.map(d => <option key={d} value={d} className="bg-bg-secondary">{d}</option>)}
-              </select>
-              <ChevronRight size={12} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-text-dim pointer-events-none" />
-            </div>
-          </div>
-
-          {/* User Highlights List */}
-          {userHighlights.length > 0 && (
-            <div className="px-6 mt-6 space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-[10px] text-text-dim font-bold uppercase tracking-widest">Saved Highlights</label>
-                <button onClick={() => setUserHighlights([])} className="text-text-dim hover:text-red-400 transition-colors">
-                  <Trash2 size={12} />
-                </button>
+          {(sidebarTab === 'dashboard' || sidebarTab === 'master-data') && (
+            <>
+              <div className="px-4 mt-6 mb-2 text-[10px] uppercase tracking-widest text-text-dim font-bold">Advanced Filters</div>
+              
+              {/* Annex Filter */}
+              <div className="px-6 py-2 space-y-2">
+                <label className="text-[10px] text-text-dim font-bold flex items-center gap-2 uppercase tracking-widest">
+                  <FileText size={12} className="text-accent" /> Annex
+                </label>
+                <div className="relative">
+                  <select 
+                    value={selectedAnnex}
+                    onChange={(e) => setSelectedAnnex(e.target.value)}
+                    className="w-full bg-bg-primary border border-border-theme rounded-lg px-3 py-2 text-xs outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all appearance-none cursor-pointer"
+                  >
+                    {annexes.map(a => <option key={a} value={a} className="bg-bg-secondary">{a}</option>)}
+                  </select>
+                  <ChevronRight size={12} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-text-dim pointer-events-none" />
+                </div>
               </div>
-              <div className="space-y-1 max-h-40 overflow-y-auto custom-scrollbar">
-                {userHighlights.map(h => (
-                  <div key={h.id} className="flex items-center gap-2 p-2 bg-bg-primary/50 rounded border border-border-theme group">
-                    <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: h.color }} />
-                    <span className="text-[10px] truncate flex-1">{h.text}</span>
+
+              {/* Category Filter */}
+              <div className="px-6 py-2 space-y-2">
+                <label className="text-[10px] text-text-dim font-bold flex items-center gap-2 uppercase tracking-widest">
+                  <Layers size={12} className="text-accent" /> Category
+                </label>
+                <div className="relative">
+                  <select 
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="w-full bg-bg-primary border border-border-theme rounded-lg px-3 py-2 text-xs outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all appearance-none cursor-pointer"
+                  >
+                    {categories.map(c => <option key={c} value={c} className="bg-bg-secondary">{c}</option>)}
+                  </select>
+                  <ChevronRight size={12} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-text-dim pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Duty Rate Filter */}
+              <div className="px-6 py-2 space-y-2">
+                <label className="text-[10px] text-text-dim font-bold flex items-center gap-2 uppercase tracking-widest">
+                  <Percent size={12} className="text-accent" /> Duty Rate
+                </label>
+                <div className="relative">
+                  <select 
+                    value={selectedDuty}
+                    onChange={(e) => setSelectedDuty(e.target.value)}
+                    className="w-full bg-bg-primary border border-border-theme rounded-lg px-3 py-2 text-xs outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all appearance-none cursor-pointer"
+                  >
+                    {dutyRates.map(d => <option key={d} value={d} className="bg-bg-secondary">{d}</option>)}
+                  </select>
+                  <ChevronRight size={12} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-text-dim pointer-events-none" />
+                </div>
+              </div>
+            </>
+          )}
+
+          {sidebarTab === 'my-highlights' && (
+            <div className="px-6 mt-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] text-text-dim font-bold uppercase tracking-widest">Manage Highlights</label>
+                {showClearAllConfirm ? (
+                  <div className="flex items-center gap-2">
                     <button 
-                      onClick={() => setUserHighlights(prev => prev.filter(item => item.id !== h.id))}
-                      className="opacity-0 group-hover:opacity-100 text-text-dim hover:text-red-400 transition-all"
+                      onClick={() => { setUserHighlights([]); setShowClearAllConfirm(false); }}
+                      className="text-[8px] font-bold text-red-400 hover:underline"
                     >
-                      <X size={10} />
+                      CONFIRM CLEAR
+                    </button>
+                    <button 
+                      onClick={() => setShowClearAllConfirm(false)}
+                      className="text-[8px] font-bold text-text-dim hover:underline"
+                    >
+                      CANCEL
                     </button>
                   </div>
-                ))}
+                ) : (
+                  <button onClick={() => setShowClearAllConfirm(true)} className="text-text-dim hover:text-red-400 transition-colors" title="Clear All">
+                    <Trash2 size={12} />
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] text-text-dim font-bold uppercase tracking-widest">Filter by Color</label>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => setHighlightFilter('All')}
+                    className={cn(
+                      "w-6 h-6 rounded-full border border-border-theme flex items-center justify-center text-[8px] font-bold",
+                      highlightFilter === 'All' ? "bg-accent text-bg-primary" : "bg-white/5 text-text-dim"
+                    )}
+                  >
+                    ALL
+                  </button>
+                  {['#fbbf24', '#f87171', '#60a5fa', '#4ade80'].map(color => (
+                    <button 
+                      key={color}
+                      onClick={() => setHighlightFilter(color)}
+                      className={cn(
+                        "w-6 h-6 rounded-full border-2 transition-all",
+                        highlightFilter === color ? "border-white scale-110" : "border-transparent"
+                      )}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                {userHighlights
+                  .filter(h => highlightFilter === 'All' || h.color === highlightFilter)
+                  .sort((a, b) => b.createdAt - a.createdAt)
+                  .map(h => (
+                    <div key={h.id} className="p-3 bg-bg-primary/50 rounded-xl border border-border-theme group space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: h.color }} />
+                        <span className="text-[10px] font-mono text-text-dim">ID: {h.id}</span>
+                        <div className="flex-1" />
+                        <button 
+                          onClick={() => setEditingHighlight(h)}
+                          className="text-text-dim hover:text-accent transition-colors"
+                        >
+                          <Edit3 size={12} />
+                        </button>
+                        {confirmDeleteId === h.id ? (
+                          <div className="flex items-center gap-2">
+                            <button 
+                              onClick={() => { setUserHighlights(prev => prev.filter(item => item.id !== h.id)); setConfirmDeleteId(null); }}
+                              className="text-[8px] font-bold text-red-400"
+                            >
+                              YES
+                            </button>
+                            <button 
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="text-[8px] font-bold text-text-dim"
+                            >
+                              NO
+                            </button>
+                          </div>
+                        ) : (
+                          <button 
+                            onClick={() => setConfirmDeleteId(h.id)}
+                            className="text-text-dim hover:text-red-400 transition-colors"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-text-main leading-relaxed italic">"{h.text}"</p>
+                      {h.annotation && (
+                        <div className="bg-accent/5 p-2 rounded border border-accent/10 flex gap-2">
+                          <MessageSquare size={10} className="text-accent shrink-0 mt-0.5" />
+                          <p className="text-[10px] text-text-dim">{h.annotation}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                {userHighlights.length === 0 && (
+                  <div className="text-center py-8 text-text-dim opacity-50">
+                    <Highlighter size={24} className="mx-auto mb-2" />
+                    <p className="text-[10px]">No highlights yet.<br/>Select text in document to add.</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
         </nav>
 
-        <div className="p-6 border-t border-border-theme">
-          <div className="text-[10px] text-text-dim font-medium">System Version 4.2.0-HTS</div>
+        <div className="p-6 border-t border-border-theme space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="text-[10px] text-text-dim font-medium uppercase tracking-widest">System Version</div>
+              <div className="text-xs font-bold">4.2.0-HTS</div>
+              <div className="text-[10px] text-accent font-bold">Powered by JUNAID ABBASI</div>
+            </div>
+            <button 
+              onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
+              className="w-10 h-10 rounded-xl bg-bg-primary border border-border-theme flex items-center justify-center text-text-dim hover:text-accent transition-all hover:scale-110"
+              title="Toggle Theme"
+            >
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -502,11 +702,12 @@ export default function App() {
           
           {/* Results Area */}
           <div className={cn(
-            "flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-6",
+            "overflow-y-auto custom-scrollbar pr-2 space-y-6 transition-all duration-500",
+            (sidebarTab === 'key-highlights' || sidebarTab === 'master-data') ? "flex-1" : "lg:w-1/2",
             viewMode === 'document' && "hidden lg:block"
           )}>
             
-            {showHighlights ? (
+            {sidebarTab === 'key-highlights' ? (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -552,60 +753,69 @@ export default function App() {
               </motion.div>
             ) : (
               <>
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold flex items-center gap-2">
-                    <LayoutGrid size={20} className="text-accent" />
-                    Search Results
-                  </h2>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 bg-bg-secondary border border-border-theme rounded-lg px-3 py-1.5">
-                      <ArrowUpDown size={14} className="text-text-dim" />
-                      <select 
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as any)}
-                        className="bg-transparent outline-none text-xs font-medium cursor-pointer text-text-dim"
-                      >
-                        <option value="code">Sort: Code</option>
-                        <option value="description">Sort: Description</option>
-                      </select>
-                    </div>
-                    <span className="text-xs text-text-dim font-medium">{filteredData.length} items</span>
+                {sidebarTab === 'dashboard' && !searchQuery.trim() && (
+                  <div className="h-full flex flex-col items-center justify-center text-text-dim opacity-30 space-y-4">
+                    <Search size={64} strokeWidth={1} />
+                    <p className="text-sm font-medium uppercase tracking-widest">Enter search query to view results</p>
                   </div>
-                </div>
+                )}
+                
+                {(sidebarTab === 'master-data' || (sidebarTab === 'dashboard' && searchQuery.trim())) && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-bold flex items-center gap-2">
+                        {sidebarTab === 'master-data' ? <Database size={20} className="text-accent" /> : <LayoutGrid size={20} className="text-accent" />}
+                        {sidebarTab === 'master-data' ? 'Master Data' : 'Search Results'}
+                      </h2>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 bg-bg-secondary border border-border-theme rounded-lg px-3 py-1.5">
+                          <ArrowUpDown size={14} className="text-text-dim" />
+                          <select 
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value as any)}
+                            className="bg-transparent outline-none text-xs font-medium cursor-pointer text-text-dim"
+                          >
+                            <option value="code">Sort: Code</option>
+                            <option value="description">Sort: Description</option>
+                          </select>
+                        </div>
+                        <span className="text-xs text-text-dim font-medium">{filteredData.length} items</span>
+                      </div>
+                    </div>
 
-                <div className="space-y-4">
-                  <AnimatePresence mode="popLayout">
-                    {filteredData.map((item, idx) => (
-                      <motion.div
-                        key={item.code + idx}
-                        layout
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.2 }}
-                        onClick={() => handleCodeClick(item.code)}
-                        className="bg-bg-secondary border border-border-theme rounded-xl overflow-hidden hover:border-accent transition-all shadow-sm group cursor-pointer"
-                      >
-                        <div className="p-5 space-y-4">
-                          <div className="flex items-start justify-between">
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-3">
-                                <span className="text-sm text-text-dim font-bold uppercase tracking-widest">HTS Code:</span>
-                                <span className="text-2xl font-bold text-accent tracking-tighter font-mono">
-                                  {highlightText(item.code, searchQuery)}
-                                </span>
+                    <div className="space-y-4">
+                      <AnimatePresence mode="popLayout">
+                        {filteredData.map((item, idx) => (
+                          <motion.div
+                            key={item.code + idx}
+                            layout
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.2 }}
+                            onClick={() => handleCodeClick(item.code)}
+                            className="bg-bg-secondary border border-border-theme rounded-xl overflow-hidden hover:border-accent transition-all shadow-sm group cursor-pointer"
+                          >
+                            <div className="p-5 space-y-4">
+                              <div className="flex items-start justify-between">
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-sm text-text-dim font-bold uppercase tracking-widest">HTS Code:</span>
+                                    <span className="text-2xl font-bold text-accent tracking-tighter font-mono">
+                                      {highlightText(item.code, searchQuery)}
+                                    </span>
+                                  </div>
+                                </div>
+                                <ChevronRight size={20} className="text-text-dim group-hover:text-accent transition-colors" />
                               </div>
-                            </div>
-                            <ChevronRight size={20} className="text-text-dim group-hover:text-accent transition-colors" />
-                          </div>
 
-                          <div className="space-y-4">
-                            <div className="bg-bg-primary/50 p-4 rounded-lg border border-border-theme">
-                              <span className="text-[10px] text-text-dim font-bold uppercase tracking-widest block mb-2">Description</span>
-                              <p className="text-sm leading-relaxed text-text-main">
-                                {highlightText(item.description, searchQuery)}
-                              </p>
-                            </div>
+                              <div className="space-y-4">
+                                <div className="bg-bg-primary/50 p-4 rounded-lg border border-border-theme">
+                                  <span className="text-[10px] text-text-dim font-bold uppercase tracking-widest block mb-2">Description</span>
+                                  <p className="text-sm leading-relaxed text-text-main">
+                                    {highlightText(item.description, searchQuery)}
+                                  </p>
+                                </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                               <div className="bg-bg-primary/30 p-3 rounded-lg border border-border-theme">
@@ -646,95 +856,134 @@ export default function App() {
                 </div>
               </>
             )}
-          </div>
+          </>
+        )}
+      </div>
 
           {/* Document Preview Pane */}
-          <div className={cn(
-            "flex-1 bg-white rounded-xl overflow-hidden flex flex-col relative shadow-2xl",
-            viewMode === 'grid' && "hidden lg:flex"
-          )}>
-            <div className="p-8 border-b-2 border-slate-900 mx-8 mt-8 flex justify-between items-end text-slate-900 font-serif italic">
-              <div className="flex items-center gap-4">
-                <span className="text-xs uppercase tracking-widest font-bold">Official Tariff Schedule</span>
-                <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-lg border border-slate-200">
-                  <Highlighter size={14} className="text-slate-500" />
-                  {['#fbbf24', '#f87171', '#60a5fa', '#4ade80'].map(color => (
+          {sidebarTab !== 'key-highlights' && sidebarTab !== 'master-data' && (
+            <div className={cn(
+              "flex-1 bg-white rounded-xl overflow-hidden flex flex-col relative shadow-2xl border border-slate-300",
+              viewMode === 'grid' && "hidden lg:flex",
+              isHighlighterMode && "cursor-pen"
+            )}>
+              <div className="p-8 border-b-2 border-slate-200 mx-8 mt-8 flex justify-between items-end text-slate-900 font-serif italic">
+                <div className="flex items-center gap-4">
+                  <span className="text-xs uppercase tracking-widest font-bold text-slate-500">Official Tariff Schedule</span>
+                  <div className={cn(
+                    "flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200 transition-all duration-300",
+                    isHighlighterMode ? "p-3 gap-4 scale-110 shadow-[0_0_25px_rgba(0,0,0,0.1)] border-accent ring-4 ring-accent/10" : ""
+                  )}>
                     <button 
-                      key={color}
-                      onClick={() => setHighlighterColor(color)}
+                      onClick={() => setIsHighlighterMode(!isHighlighterMode)}
                       className={cn(
-                        "w-4 h-4 rounded-full border border-white transition-transform",
-                        highlighterColor === color ? "scale-125 shadow-sm" : "hover:scale-110"
+                        "p-2 rounded-lg transition-all",
+                        isHighlighterMode ? "text-accent bg-accent/10 scale-110" : "text-text-dim hover:bg-white/5"
                       )}
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                  <div className="w-px h-3 bg-slate-200 mx-1" />
-                  <button 
-                    onClick={() => setUserHighlights([])}
-                    className="text-[10px] text-slate-400 hover:text-red-500 transition-colors flex items-center gap-1"
-                    title="Clear all highlights"
-                  >
-                    <Trash2 size={12} />
-                    Clear
-                  </button>
+                      title={isHighlighterMode ? "Disable Highlighter Mode" : "Enable Highlighter Mode"}
+                    >
+                      <Highlighter size={16} />
+                    </button>
+                    <div className="w-px h-4 bg-border-theme mx-1" />
+                    {['#fbbf24', '#f87171', '#60a5fa', '#4ade80'].map(color => (
+                      <button 
+                        key={color}
+                        onClick={() => {
+                          setHighlighterColor(color);
+                          setIsHighlighterMode(true);
+                        }}
+                        className={cn(
+                          "rounded-full border-2 border-white transition-all",
+                          isHighlighterMode ? "w-6 h-6" : "w-4 h-4",
+                          highlighterColor === color && isHighlighterMode ? "scale-125 shadow-md ring-2 ring-accent ring-offset-2 ring-offset-bg-primary" : "hover:scale-110 opacity-70 hover:opacity-100"
+                        )}
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                    <div className="relative group/color">
+                      <input 
+                        type="color" 
+                        value={highlighterColor}
+                        onChange={(e) => {
+                          setHighlighterColor(e.target.value);
+                          setIsHighlighterMode(true);
+                        }}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      />
+                      <div className={cn(
+                        "rounded-full border-2 border-white transition-all flex items-center justify-center overflow-hidden",
+                        isHighlighterMode ? "w-6 h-6" : "w-4 h-4",
+                        !['#fbbf24', '#f87171', '#60a5fa', '#4ade80'].includes(highlighterColor) && isHighlighterMode ? "scale-125 shadow-md ring-2 ring-accent ring-offset-2 ring-offset-bg-primary" : "hover:scale-110 opacity-70 hover:opacity-100"
+                      )} style={{ backgroundColor: highlighterColor }}>
+                        <span className="text-[8px] text-white mix-blend-difference font-bold">+</span>
+                      </div>
+                    </div>
+                    <div className="w-px h-4 bg-border-theme mx-1" />
+                    <button 
+                      onClick={() => setUserHighlights([])}
+                      className="text-[10px] text-text-dim hover:text-red-500 transition-colors flex items-center gap-1 px-2 py-1 hover:bg-red-500/5 rounded"
+                      title="Clear all highlights"
+                    >
+                      <Trash2 size={12} />
+                      Clear
+                    </button>
+                  </div>
+                </div>
+                <span className="text-sm">Section 232 Analysis</span>
+              </div>
+              
+              <div 
+                ref={docContainerRef}
+                onMouseUp={handleTextSelection}
+                className="flex-1 overflow-y-auto p-8 custom-scrollbar text-text-main relative select-text"
+              >
+                <div 
+                  className="document-view whitespace-pre-wrap leading-relaxed transition-all duration-200"
+                  style={{ fontSize: `${(zoom / 100) * 0.875}rem` }}
+                >
+                  {documentText.split('\n').map((line, i) => renderDocumentLine(line, i))}
                 </div>
               </div>
-              <span className="text-sm">Section 232 Analysis</span>
-            </div>
-            
-            <div 
-              ref={docContainerRef}
-              onMouseUp={handleTextSelection}
-              className="flex-1 overflow-y-auto p-8 custom-scrollbar text-slate-800 relative select-text"
-            >
-              <div 
-                className="document-view whitespace-pre-wrap leading-relaxed transition-all duration-200"
-                style={{ fontSize: `${(zoom / 100) * 0.875}rem` }}
-              >
-                {documentText.split('\n').map((line, i) => renderDocumentLine(line, i))}
-              </div>
-            </div>
 
-            {/* Tooltip */}
-            {tooltip && (
-              <div 
-                className="fixed z-[100] bg-slate-900 text-white text-xs p-3 rounded-lg shadow-2xl border border-slate-700 max-w-sm pointer-events-none backdrop-blur-md bg-opacity-95"
-                style={{ 
-                  left: Math.min(tooltip.x + 20, window.innerWidth - 320), 
-                  top: tooltip.y + 20 
-                }}
-              >
-                <div className="flex flex-col gap-1">
-                  <span className="font-bold text-accent uppercase tracking-tighter text-[10px]">HTS Classification Info</span>
-                  <p className="leading-relaxed">{tooltip.text}</p>
+              {/* Tooltip */}
+              {tooltip && (
+                <div 
+                  className="fixed z-[100] bg-slate-900 text-white text-xs p-3 rounded-lg shadow-2xl border border-slate-700 max-w-sm pointer-events-none backdrop-blur-md bg-opacity-95"
+                  style={{ 
+                    left: Math.min(tooltip.x + 20, window.innerWidth - 320), 
+                    top: tooltip.y + 20 
+                  }}
+                >
+                  <div className="flex flex-col gap-1">
+                    <span className="font-bold text-accent uppercase tracking-tighter text-[10px]">HTS Classification Info</span>
+                    <p className="leading-relaxed">{tooltip.text}</p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Zoom Overlay */}
-            <div className="absolute bottom-6 right-6 bg-bg-primary/90 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-4 text-white text-[10px] font-bold uppercase tracking-wider border border-border-theme shadow-lg">
-              <button onClick={handleZoomOut} className="hover:text-accent transition-colors"><ZoomOut size={14} /></button>
-              <span className="w-10 text-center">{zoom}%</span>
-              <button onClick={handleZoomIn} className="hover:text-accent transition-colors"><ZoomIn size={14} /></button>
-              <div className="w-px h-3 bg-border-theme" />
-              <button 
-                onClick={() => setViewMode('grid')}
-                className="hover:text-accent transition-colors lg:hidden"
-              >
-                Back to List
-              </button>
-              <button 
-                onClick={() => setZoom(100)}
-                className="hover:text-accent transition-colors hidden lg:block"
-              >
-                Reset Zoom
-              </button>
+              {/* Zoom Overlay */}
+              <div className="absolute bottom-6 right-6 bg-bg-primary/90 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-4 text-white text-[10px] font-bold uppercase tracking-wider border border-border-theme shadow-lg">
+                <button onClick={handleZoomOut} className="hover:text-accent transition-colors"><ZoomOut size={14} /></button>
+                <span className="w-10 text-center">{zoom}%</span>
+                <button onClick={handleZoomIn} className="hover:text-accent transition-colors"><ZoomIn size={14} /></button>
+                <div className="w-px h-3 bg-border-theme" />
+                <button 
+                  onClick={() => setViewMode('grid')}
+                  className="hover:text-accent transition-colors lg:hidden"
+                >
+                  Back to List
+                </button>
+                <button 
+                  onClick={() => setZoom(100)}
+                  className="hover:text-accent transition-colors hidden lg:block"
+                >
+                  Reset Zoom
+                </button>
+              </div>
             </div>
+          )}
           </div>
-
-        </div>
-      </main>
+        </main>
 
       {/* Detail Modal */}
       <AnimatePresence>
@@ -863,6 +1112,110 @@ export default function App() {
                   className="px-6 py-2 bg-accent text-bg-primary font-bold text-sm rounded-lg hover:shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all"
                 >
                   Close Details
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Annotation Modal */}
+      <AnimatePresence>
+        {editingHighlight && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setEditingHighlight(null)}
+              className="absolute inset-0 bg-bg-primary/80 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-md bg-bg-secondary border border-border-theme rounded-2xl shadow-2xl overflow-hidden p-6 space-y-4"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <Edit3 size={18} className="text-accent" />
+                  Edit Highlight
+                </h3>
+                <button onClick={() => setEditingHighlight(null)} className="text-text-dim hover:text-text-main">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-3 bg-bg-primary rounded-lg border border-border-theme">
+                  <label className="text-[10px] text-text-dim font-bold uppercase tracking-widest block mb-2">Selected Text</label>
+                  <p className="text-xs italic text-text-main leading-relaxed">"{editingHighlight.text}"</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] text-text-dim font-bold uppercase tracking-widest block">Highlight Color</label>
+                  <div className="flex gap-3">
+                    {['#fbbf24', '#f87171', '#60a5fa', '#4ade80'].map(color => (
+                      <button 
+                        key={color}
+                        onClick={() => setEditingHighlight(prev => prev ? { ...prev, color } : null)}
+                        className={cn(
+                          "w-8 h-8 rounded-full border-2 transition-all",
+                          editingHighlight.color === color ? "border-white scale-110 shadow-lg" : "border-transparent"
+                        )}
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] text-text-dim font-bold uppercase tracking-widest block">Annotation / Note</label>
+                  <textarea 
+                    value={editingHighlight.annotation || ''}
+                    onChange={(e) => setEditingHighlight(prev => prev ? { ...prev, annotation: e.target.value } : null)}
+                    placeholder="Add a detailed note or annotation to this highlight..."
+                    className="w-full bg-bg-primary border border-border-theme rounded-xl p-5 text-sm outline-none focus:ring-2 focus:ring-accent min-h-[200px] resize-none shadow-inner transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                {confirmDeleteId === editingHighlight.id ? (
+                  <div className="flex-1 flex gap-2">
+                    <button 
+                      onClick={() => {
+                        setUserHighlights(prev => prev.filter(h => h.id !== editingHighlight.id));
+                        setEditingHighlight(null);
+                        setConfirmDeleteId(null);
+                      }}
+                      className="flex-1 px-4 py-2 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all"
+                    >
+                      CONFIRM DELETE
+                    </button>
+                    <button 
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="flex-1 px-4 py-2 bg-bg-primary border border-border-theme text-text-dim text-xs font-bold rounded-lg hover:text-text-main transition-all"
+                    >
+                      CANCEL
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => setConfirmDeleteId(editingHighlight.id)}
+                    className="flex-1 px-4 py-2 border border-red-500/30 text-red-400 text-sm font-bold rounded-lg hover:bg-red-500/10 transition-all flex items-center justify-center gap-2"
+                  >
+                    <Trash2 size={16} /> Delete
+                  </button>
+                )}
+                <button 
+                  onClick={() => {
+                    setUserHighlights(prev => prev.map(h => h.id === editingHighlight.id ? editingHighlight : h));
+                    setEditingHighlight(null);
+                  }}
+                  className="flex-[2] px-4 py-2 bg-accent text-bg-primary text-sm font-bold rounded-lg hover:shadow-lg transition-all"
+                >
+                  Save Changes
                 </button>
               </div>
             </motion.div>
