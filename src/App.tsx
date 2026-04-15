@@ -52,7 +52,6 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>('dark');
   const [selectedAnnex, setSelectedAnnex] = useState<string>('All');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [selectedDuty, setSelectedDuty] = useState<string>('All');
   const [sortBy, setSortBy] = useState<'code' | 'description'>('code');
   const [zoom, setZoom] = useState(100);
   const [viewMode, setViewMode] = useState<'grid' | 'document'>('grid');
@@ -144,11 +143,6 @@ export default function App() {
 
   const categories = useMemo(() => {
     const unique = Array.from(new Set(htsData.map(item => item.category).filter(Boolean)));
-    return ['All', ...unique as string[]];
-  }, []);
-
-  const dutyRates = useMemo(() => {
-    const unique = Array.from(new Set(htsData.map(item => item.dutyRate).filter(Boolean)));
     return ['All', ...unique as string[]];
   }, []);
 
@@ -272,20 +266,18 @@ export default function App() {
           item.description.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesAnnex = selectedAnnex === 'All' || item.annex === selectedAnnex;
         const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
-        const matchesDuty = selectedDuty === 'All' || item.dutyRate === selectedDuty;
-        return matchesSearch && matchesAnnex && matchesCategory && matchesDuty;
+        return matchesSearch && matchesAnnex && matchesCategory;
       })
       .sort((a, b) => {
         if (sortBy === 'code') return a.code.localeCompare(b.code);
         return a.description.localeCompare(b.description);
       });
-  }, [searchQuery, selectedAnnex, selectedCategory, selectedDuty, sortBy, sidebarTab]);
+  }, [searchQuery, selectedAnnex, selectedCategory, sortBy, sidebarTab]);
 
   const handleReset = () => {
     setSearchQuery('');
     setSelectedAnnex('All');
     setSelectedCategory('All');
-    setSelectedDuty('All');
     setSortBy('code');
     setHighlightedCode(null);
     setSidebarTab('dashboard');
@@ -520,23 +512,6 @@ export default function App() {
                     className="w-full bg-bg-primary border border-border-theme rounded-lg px-3 py-2 text-xs outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all appearance-none cursor-pointer"
                   >
                     {categories.map(c => <option key={c} value={c} className="bg-bg-secondary">{c}</option>)}
-                  </select>
-                  <ChevronRight size={12} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-text-dim pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Duty Rate Filter */}
-              <div className="px-6 py-2 space-y-2">
-                <label className="text-[10px] text-text-dim font-bold flex items-center gap-2 uppercase tracking-widest">
-                  <Percent size={12} className="text-accent" /> Duty Rate
-                </label>
-                <div className="relative">
-                  <select 
-                    value={selectedDuty}
-                    onChange={(e) => setSelectedDuty(e.target.value)}
-                    className="w-full bg-bg-primary border border-border-theme rounded-lg px-3 py-2 text-xs outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all appearance-none cursor-pointer"
-                  >
-                    {dutyRates.map(d => <option key={d} value={d} className="bg-bg-secondary">{d}</option>)}
                   </select>
                   <ChevronRight size={12} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-text-dim pointer-events-none" />
                 </div>
