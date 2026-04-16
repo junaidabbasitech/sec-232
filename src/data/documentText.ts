@@ -45,6 +45,24 @@ Steel Description
 7305 Tubes and pipes nesoi (welded, riveted or similarly closed, etc.), having internal and external cross sections with an external diameter of over 406.4 mm (16 in.), of iron or steel
 7306 Tubes, pipes and hollow profiles nesoi (open-seamed or welded, riveted or similarly closed), of iron or steel
 
+Aluminum Description
+7601 Aluminum, unwrought
+7604 Aluminum bars, rods and profiles
+7605 Aluminum wire
+7606 Aluminum plates, sheets and strip, over 0.2 mm (0.0079 in.) thick
+7607 Aluminum foil (whether or not printed or backed with paper or other backing materials), not over 0.2 mm (0.0079 in.) thick (excluding any backing)
+7608 Aluminum tubes and pipes
+7609 Aluminum tube or pipe fittings (including couplings, elbows, and sleeves)
+7616.99.51.60 Aluminum castings
+7616.99.51.70 Aluminum forgings
+
+Copper Description
+7406.10.00 Copper, powders of non-lamellar structure
+7406.20.00 Copper, powders of lamellar structure; copper flakes
+7407.10.15 Refined copper, hollow profiles
+7407.10.30 Refined copper, profiles (other than hollow profiles)
+7407.10.50 Refined copper, bars and rods
+
 Steel Derivatives Description
 7216.91.00.10 Iron or nonalloy steel, angle, shapes and sections nesoi, cold-formed or cold-finished from flat-rolled products, further worked than cold formed or cold-finished
 7301.20.10 Iron or nonalloy steel, angles, shapes and sections, welded
@@ -66,6 +84,7 @@ Steel Derivatives Description
 7321.19.00 Iron or steel, non-electric domestic cooking appliances and plate warmers, other than for gas or liquid fuels
 7321.81.10 Iron or steel, portable non-electric domestic grates and warming appliances (other than cooking or plate warmers), for gas fuel or for both gas and other fuels
 7321.81.50 Iron or steel, nonportable non-electric domestic grates and warming appliances (other than cooking or plate warmers), for gas fuel or for both gas and other fuels
+8302.42.30 Other mountings, fittings and similar articles: Other, for furniture
 
 Annex II: Removed from Scope of Section 232 Steel and Aluminum Derivatives
 Note: The following articles will not be subject to Section 232 aluminum, steel or copper tariffs. 
@@ -99,11 +118,11 @@ consumption, on or after 12:01 a.m. eastern time on April 6, 2026...
 
 (i) Articles of aluminum:
 7601 7604 7605 7606
-7607 7608 7609 7616.99.5160
-7616.99.5170
+7607 7608 7609 7616.99.51.60
+7616.99.51.70
 
 (ii) Derivative aluminum articles:
-7308.20.0035 7610.10.00 7610.90.00 7612.10.00
+7308.20.00.35 7610.10.00 7610.90.00 7612.10.00
 7612.90.10 7612.90.50 7613.00.00 7614.10.10
 7614.10.50 7614.90.20 7614.90.40 7614.90.50
 
@@ -118,4 +137,34 @@ consumption, on or after 12:01 a.m. eastern time on April 6, 2026...
 7226 7227 7228 7229
 7301.10.00 7302.10 7302.40.00 7302.90
 7304 7305 7306
+
+Section 232 Automated Tariff Engine - Operational Guidelines
+For any HTS Code provided, the following legally precise duty determination steps apply:
+
+STEP 1: INITIAL CLASSIFICATION
+1. Identify if the HTS Code is in Annex I-A, I-B, II, III, or IV.
+2. Determine "Metal Class" (Steel, Aluminum, or Copper).
+3. Determine "Status" (Primary Article or Derivative).
+
+STEP 2: AUTOMATED LOGIC GATES
+GATE A: Origin Check (Russia)
+- Origin = RUSSIA & Aluminum: 200% Duty (9903.85.67). BLOCK 15% rule.
+- Origin = RUSSIA & Steel/Copper: 50% Duty. BLOCK 15% rule.
+
+GATE B: Chapter 99 Mapping (Annex IV)
+Assignable HTSUS provisions:
+- 9903.82.02: (50% duty) - General coverage.
+- 9903.82.03: (0% duty) - If weight is <15% (Exceptions apply).
+- 9903.82.04 / 05: (15%–25% duty) - If Origin = UK.
+- 9903.82.06: (10% duty) - Copper articles and specific derivative aluminum/steel.
+- 9903.82.07: Minimum 10% duty for derivatives.
+- 9903.82.08: No additional duty if base rate is ≥10%.
+- 9903.82.09: (25% duty) - Copper and specific derivatives.
+- 9903.82.10–12: Special derivative rules for non-U.S. processed metals.
+
+GATE C: The "95% Rule" Check
+- Aluminum: 95%+ Smelted & Cast in U.S.
+- Steel: 95%+ Melted & Poured in U.S.
+- Copper: 95%+ Smelted & Cast in U.S.
+Failure to meet these requirements flags for potential higher duty.
 `;

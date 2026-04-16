@@ -1,6 +1,6 @@
 {
   "name": "HTS Tariff Explorer",
-  "description": "A robust web application for exploring HTS codes and tariff information from Section 232 documents. Features real-time search, filtering, and document visualization.",
+  "description": "A robust web application for exploring HTS codes and tariff information. Features a Section 232 Automated Tariff Engine for precise duty determination based on origin and classification.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }
