@@ -4,10 +4,6 @@ Note: A 50% ad valorem Section 232 tariff shall apply to the full value of the f
 If a product is identified on multiple lists in this Annex, it will only be subject to a 50% Section 
 232 tariff, rather than a combined rate. 
 
-If product does not contain any Aluminum, Steel or Copper content, then excluctions apply and the product is not subject to Section 232 tariffs.
-
-Exclution:  9903.82.01 - 0% duty for products that do not contain any Aluminum, Steel or Copper content.
-
 Steel Description:
 
 7206 Iron and nonalloy steel in ingots or other primary forms (excluding iron of heading 7203)
