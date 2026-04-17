@@ -21,7 +21,6 @@ import {
   CheckCircle2,
   BookOpen,
   RotateCcw,
-  Scale,
   X,
   Highlighter,
   Trash2,
@@ -39,8 +38,6 @@ import { keyHighlights, actionRequired } from './data/highlights';
 import { HTSItem, Theme } from './types';
 import { cn } from './lib/utils';
 import { getTariffsForSubdivision } from './data/tariffRules';
-
-import TariffEngine from './components/TariffEngine';
 
 interface UserHighlight {
   id: string;
@@ -468,16 +465,6 @@ export default function App() {
           </button>
 
           <button 
-            onClick={() => { setSidebarTab('tariff-engine'); setHighlightedCode(null); }}
-            className={cn(
-              "w-full px-6 py-3 text-sm flex items-center gap-3 transition-all",
-              sidebarTab === 'tariff-engine' ? "text-text-main bg-white/5 border-l-4 border-accent" : "text-text-dim hover:text-text-main hover:bg-white/5"
-            )}
-          >
-            <Scale size={18} />
-            Tariff Engine
-          </button>
-          <button 
              onClick={() => { setSidebarTab('master-data'); setHighlightedCode(null); }}
             className={cn(
               "w-full px-6 py-3 text-sm flex items-center gap-3 transition-all",
@@ -712,7 +699,7 @@ export default function App() {
           {/* Results Area */}
           <div className={cn(
             "overflow-y-auto custom-scrollbar pr-2 space-y-6 transition-all duration-500",
-            (sidebarTab === 'key-highlights' || sidebarTab === 'master-data') ? "flex-1" : "lg:w-1/2",
+            (sidebarTab === 'key-highlights' || sidebarTab === 'master-data' || sidebarTab === 'full-document') ? "flex-1" : "lg:w-1/2",
             viewMode === 'document' && "hidden lg:block"
           )}>
             
@@ -722,7 +709,6 @@ export default function App() {
               animate={{ opacity: 1, x: 0 }}
               className="flex-1 bg-white rounded-2xl p-8 shadow-inner overflow-y-auto custom-scrollbar"
             >
-                <div className="max-w-4xl mx-auto space-y-6">
                     <div className="border-b-4 border-slate-900 pb-6 mb-12">
                         <h1 className="text-4xl font-black tracking-tighter text-slate-900 mb-2 uppercase">Official Master Document</h1>
                         <p className="text-slate-500 font-serif italic">Section 232 Tariff Schedule and Operational Guidelines</p>
@@ -730,15 +716,6 @@ export default function App() {
                     <div className="document-view prose prose-slate max-w-none">
                         {documentText.split('\n').map((line, i) => renderDocumentLine(line, i))}
                     </div>
-                </div>
-            </motion.div>
-          ) : sidebarTab === 'tariff-engine' ? (
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex-1"
-            >
-              <TariffEngine />
             </motion.div>
           ) : sidebarTab === 'key-highlights' ? (
               <motion.div 
@@ -894,7 +871,7 @@ export default function App() {
       </div>
 
           {/* Document Preview Pane */}
-          {sidebarTab !== 'key-highlights' && sidebarTab !== 'master-data' && sidebarTab !== 'tariff-engine' && sidebarTab !== 'full-document' && (
+          {sidebarTab !== 'key-highlights' && sidebarTab !== 'master-data' && sidebarTab !== 'full-document' && (
             <div className={cn(
               "flex-1 bg-white rounded-xl overflow-hidden flex flex-col relative shadow-2xl border border-slate-300",
               viewMode === 'grid' && "hidden lg:flex",
