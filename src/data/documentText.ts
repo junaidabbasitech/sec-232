@@ -94,13 +94,13 @@ Steel Derivatives Description
 0402.99.68 Milk and cream (except condensed milk), concentrated in non-solid forms, sweetened, subject to general note 15 of the HTSUS
 0402.99.70 Milk and cream (except condensed milk), concentrated in non-solid forms, sweetened, subject to additional U.S. note 10 to chapter 4 of the HTSUS
 0402.99.90 Milk and cream (except condensed milk), concentrated in non-solid forms, sweetened, not described in general note 15 or additional U.S. note 10 to chapter 4 of the HTSUS
-2106.90.99.98 Food preparations nesoi, not canned or frozen
-2710.19.30.50 Steam cylinder oils
-2711.12.00.20 Propane, liquefied, other than with a minimum purity of 90 liquid volume percent
-2804.29.00.10 Helium
-2804.40.00.00 Oxygen
-2901.22.00.00 Propene (propylene)
-2903.42.10.00 Difluoromethane (HFC-32)
+2106.90.9998 Food preparations nesoi, not canned or frozen
+2710.19.3050 Steam cylinder oils
+2711.12.0020 Propane, liquefied, other than with a minimum purity of 90 liquid volume percent
+2804.29.0010 Helium
+2804.40.0000 Oxygen
+2901.22.0000 Propene (propylene)
+2903.42.1000 Difluoromethane (HFC-32)
 
 Annex III: Temporary Reduction List for Section 232 Steel and Aluminum Derivatives
 Note: The 25% Section 232 tariff on steel and aluminum derivative articles shall be reduced for products listed in this Annex...
@@ -119,20 +119,24 @@ consumption, on or after 12:01 a.m. eastern time on April 6, 2026...
 
 (i) Articles of aluminum:
 7601 7604 7605 7606
-7607 7608 7609 7616.99.51.60
-7616.99.51.70
+7607 7608 7609 
+7616.99.5160
+7616.99.5170
 
 (ii) Derivative aluminum articles:
-7308.20.00.35 7610.10.00 7610.90.00 7612.10.00
+7308.20.0035 
+7610.10.00 7610.90.00 7612.10.00
 7612.90.10 7612.90.50 7613.00.00 7614.10.10
 7614.10.50 7614.90.20 7614.90.40 7614.90.50
 
 (iii) Articles of steel:
 7206 7207 7208 7209
 7210 7211 7212 7213
-7214 7215 7216.10.00 7216.21.00
+7214 7215 
+7216.10.00 7216.21.00
 7216.22.00 7216.31.00 7216.32.00 7216.33.00
-7216.40.00 7216.50.00 7216.99.00 7217
+7216.40.00 7216.50.00 7216.99.00 
+7217
 7218 7219 7220 7221
 7222 7223 7224 7225
 7226 7227 7228 7229
@@ -161,7 +165,8 @@ Assignable HTSUS provisions:
 - 9903.82.07: Minimum 10% duty for derivatives.
 - 9903.82.08: No additional duty if base rate is ≥10%.
 - 9903.82.09: (25% duty) - Copper and specific derivatives.
-- 9903.82.10–12: Special derivative rules for non-U.S. processed metals.
+- 9903.82.10: Special derivative rules for non-U.S. processed metals.
+- 9903.82.12: Special derivative rules for non-U.S. processed metals.
 
 GATE C: The "95% Rule" Check
 - Aluminum: 95%+ Smelted & Cast in U.S.

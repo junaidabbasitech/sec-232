@@ -89,7 +89,7 @@ export const htsData: HTSItem[] = [
     dutyRate: '10%',
     notes: 'Headings 9903.82.02–9903.82.17 apply to the full customs value of articles classifiable in the provisions of the HTSUS enumerated in the following lists.'
   },
-  { code: '7308.20.00.35', description: 'Derivative aluminum articles: Towers and lattice masts', annex: 'Annex IV', page: 45, category: 'Aluminum Derivatives', subdivision: '(vi)', additionalTariff: '9903.82.06', dutyRate: '10%' },
+  { code: '7308.20.0035', description: 'Derivative aluminum articles: Towers and lattice masts', annex: 'Annex IV', page: 45, category: 'Aluminum Derivatives', subdivision: '(vi)', additionalTariff: '9903.82.06', dutyRate: '10%' },
   { code: '7610.10.00', description: 'Derivative aluminum articles: Doors, windows and their frames and thresholds for doors', annex: 'Annex IV', page: 45, category: 'Aluminum Derivatives', subdivision: '(vi)', additionalTariff: '9903.82.06', dutyRate: '10%' },
   { code: '7610.90.00', description: 'Derivative aluminum articles: Aluminum structures and parts of structures nesoi', annex: 'Annex IV', page: 45, category: 'Aluminum Derivatives', subdivision: '(vi)', additionalTariff: '9903.82.06', dutyRate: '10%' },
   { code: '7612.10.00', description: 'Derivative aluminum articles: Aluminum containers, collapsible tubular', annex: 'Annex IV', page: 45, category: 'Aluminum Derivatives', subdivision: '(vi)', additionalTariff: '9903.82.06', dutyRate: '10%' },
@@ -726,8 +726,8 @@ export const htsData: HTSItem[] = [
   { code: '7607', description: 'Articles of aluminum: Foil', annex: 'Annex IV', page: 43, category: 'Aluminum', subdivision: '(i)' },
   { code: '7608', description: 'Articles of aluminum: Tubes and pipes', annex: 'Annex IV', page: 43, category: 'Aluminum', subdivision: '(i)' },
   { code: '7609', description: 'Articles of aluminum: Tube or pipe fittings', annex: 'Annex IV', page: 43, category: 'Aluminum', subdivision: '(i)' },
-  { code: '7616.99.51.60', description: 'Articles of aluminum: Aluminum castings', annex: 'Annex IV', page: 43, category: 'Aluminum', subdivision: '(i)' },
-  { code: '7616.99.51.70', description: 'Articles of aluminum: Aluminum forgings', annex: 'Annex IV', page: 43, category: 'Aluminum', subdivision: '(i)' },
+  { code: '7616.99.5160', description: 'Articles of aluminum: Aluminum castings', annex: 'Annex IV', page: 43, category: 'Aluminum', subdivision: '(i)' },
+  { code: '7616.99.5170', description: 'Articles of aluminum: Aluminum forgings', annex: 'Annex IV', page: 43, category: 'Aluminum', subdivision: '(i)' },
 
   // Annex IV: Articles of steel
   { code: '7206', description: 'Articles of steel: Iron and nonalloy steel in ingots', annex: 'Annex IV', page: 44, category: 'Steel', subdivision: '(iii)' },
