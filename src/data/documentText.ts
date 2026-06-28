@@ -54,8 +54,8 @@ Aluminum Description
 7607 Aluminum foil (whether or not printed or backed with paper or other backing materials), not over 0.2 mm (0.0079 in.) thick (excluding any backing)
 7608 Aluminum tubes and pipes
 7609 Aluminum tube or pipe fittings (including couplings, elbows, and sleeves)
-7616.99.51.60 Aluminum castings
-7616.99.51.70 Aluminum forgings
+7616.99.5160 Aluminum castings
+7616.99.5170 Aluminum forgings
 
 Copper Description
 7406.10.00 Copper, powders of non-lamellar structure
