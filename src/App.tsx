@@ -29,11 +29,14 @@ import {
   MessageSquare,
   Edit3,
   StickyNote,
-  Database
+  Database,
+  Truck,
+  TreePine
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { htsData } from './data/htsData';
-import { documentText } from './data/documentText';
+import { documentText, woodText, mhdvText } from './data/documentText';
+import { metalsText } from './data/metalsText';
 import { keyHighlights, actionRequired } from './data/highlights';
 import { HTSItem, Theme } from './types';
 import { cn } from './lib/utils';
@@ -57,7 +60,7 @@ export default function App() {
   const [zoom, setZoom] = useState(100);
   const [viewMode, setViewMode] = useState<'grid' | 'document'>('grid');
   const [highlightedCode, setHighlightedCode] = useState<string | null>(null);
-  const [sidebarTab, setSidebarTab] = useState<'dashboard' | 'master-data' | 'key-highlights' | 'my-highlights' | 'tariff-engine' | 'full-document'>('dashboard');
+  const [sidebarTab, setSidebarTab] = useState<'dashboard' | 'master-data' | 'key-highlights' | 'my-highlights' | 'tariff-engine' | 'full-document' | 'mhdv-document' | 'wood-document' | 'metals-document'>('dashboard');
   const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
   const [selectedItem, setSelectedItem] = useState<HTSItem | null>(null);
   const [userHighlights, setUserHighlights] = useState<UserHighlight[]>(() => {
@@ -465,6 +468,39 @@ export default function App() {
           </button>
 
           <button 
+            onClick={() => { setSidebarTab('mhdv-document'); setHighlightedCode(null); }}
+            className={cn(
+              "w-full px-6 py-3 text-sm flex items-center gap-3 transition-all",
+              sidebarTab === 'mhdv-document' ? "text-text-main bg-white/5 border-l-4 border-accent" : "text-text-dim hover:text-text-main hover:bg-white/5"
+            )}
+          >
+            <Truck size={18} />
+            MHDV Sec 232
+          </button>
+
+          <button 
+            onClick={() => { setSidebarTab('wood-document'); setHighlightedCode(null); }}
+            className={cn(
+              "w-full px-6 py-3 text-sm flex items-center gap-3 transition-all",
+              sidebarTab === 'wood-document' ? "text-text-main bg-white/5 border-l-4 border-accent" : "text-text-dim hover:text-text-main hover:bg-white/5"
+            )}
+          >
+            <TreePine size={18} />
+            Wood Sec 232
+          </button>
+
+          <button 
+            onClick={() => { setSidebarTab('metals-document'); setHighlightedCode(null); }}
+            className={cn(
+              "w-full px-6 py-3 text-sm flex items-center gap-3 transition-all",
+              sidebarTab === 'metals-document' ? "text-text-main bg-white/5 border-l-4 border-accent" : "text-text-dim hover:text-text-main hover:bg-white/5"
+            )}
+          >
+            <Layers size={18} />
+            Metals Sec 232
+          </button>
+
+          <button 
              onClick={() => { setSidebarTab('master-data'); setHighlightedCode(null); }}
             className={cn(
               "w-full px-6 py-3 text-sm flex items-center gap-3 transition-all",
@@ -699,7 +735,7 @@ export default function App() {
           {/* Results Area */}
           <div className={cn(
             "overflow-y-auto custom-scrollbar pr-2 space-y-6 transition-all duration-500",
-            (sidebarTab === 'key-highlights' || sidebarTab === 'master-data' || sidebarTab === 'full-document') ? "flex-1" : "lg:w-1/2",
+            (sidebarTab === 'key-highlights' || sidebarTab === 'master-data' || sidebarTab === 'full-document' || sidebarTab === 'mhdv-document' || sidebarTab === 'wood-document' || sidebarTab === 'metals-document') ? "flex-1" : "lg:w-1/2",
             viewMode === 'document' && "hidden lg:block"
           )}>
             
@@ -715,6 +751,48 @@ export default function App() {
                     </div>
                     <div className="document-view prose prose-slate max-w-none">
                         {documentText.split('\n').map((line, i) => renderDocumentLine(line, i))}
+                    </div>
+            </motion.div>
+          ) : sidebarTab === 'mhdv-document' ? (
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex-1 bg-white rounded-2xl p-8 shadow-inner overflow-y-auto custom-scrollbar"
+            >
+                    <div className="border-b-4 border-slate-900 pb-6 mb-12">
+                        <h1 className="text-4xl font-black tracking-tighter text-slate-900 mb-2 uppercase">MHDV Section 232 Guidelines</h1>
+                        <p className="text-slate-500 font-serif italic">Medium-Heavy Duty Vehicles, Parts, and Buses</p>
+                    </div>
+                    <div className="document-view prose prose-slate max-w-none">
+                        {mhdvText.split('\n').map((line, i) => renderDocumentLine(line, i))}
+                    </div>
+            </motion.div>
+          ) : sidebarTab === 'wood-document' ? (
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex-1 bg-white rounded-2xl p-8 shadow-inner overflow-y-auto custom-scrollbar"
+            >
+                    <div className="border-b-4 border-slate-900 pb-6 mb-12">
+                        <h1 className="text-4xl font-black tracking-tighter text-slate-900 mb-2 uppercase">Wood & Timber Section 232 Guidelines</h1>
+                        <p className="text-slate-500 font-serif italic">Timber, Lumber, and Derivative Products</p>
+                    </div>
+                    <div className="document-view prose prose-slate max-w-none">
+                        {woodText.split('\n').map((line, i) => renderDocumentLine(line, i))}
+                    </div>
+            </motion.div>
+          ) : sidebarTab === 'metals-document' ? (
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex-1 bg-white rounded-2xl p-8 shadow-inner overflow-y-auto custom-scrollbar"
+            >
+                    <div className="border-b-4 border-slate-900 pb-6 mb-12">
+                        <h1 className="text-4xl font-black tracking-tighter text-slate-900 mb-2 uppercase">Metals Section 232 Guidelines</h1>
+                        <p className="text-slate-500 font-serif italic">Steel, Aluminum, and Copper Derivatives</p>
+                    </div>
+                    <div className="document-view prose prose-slate max-w-none">
+                        {metalsText.split('\n').map((line, i) => renderDocumentLine(line, i))}
                     </div>
             </motion.div>
           ) : sidebarTab === 'key-highlights' ? (
