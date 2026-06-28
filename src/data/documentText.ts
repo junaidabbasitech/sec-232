@@ -65,7 +65,7 @@ Copper Description
 7407.10.50 Refined copper, bars and rods
 
 Steel Derivatives Description
-7216.91.00.10 Iron or nonalloy steel, angle, shapes and sections nesoi, cold-formed or cold-finished from flat-rolled products, further worked than cold formed or cold-finished
+7216.91.0010 Iron or nonalloy steel, angle, shapes and sections nesoi, cold-formed or cold-finished from flat-rolled products, further worked than cold formed or cold-finished
 7301.20.10 Iron or nonalloy steel, angles, shapes and sections, welded
 7301.20.50 Alloy steel, angles, shapes and sections of alloy steel, welded
 7302.30.00 Iron or steel, switch blades, crossing frogs, point rods and other crossing pieces, for jointing or fixing rails
