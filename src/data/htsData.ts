@@ -103,7 +103,7 @@ export const htsData: HTSItem[] = [
   { code: '7614.90.50', description: 'Derivative aluminum articles: Stranded wire nesoi, of aluminum, not with steel core, other', annex: 'Annex IV', page: 45, category: 'Aluminum Derivatives', subdivision: '(vi)', additionalTariff: '9903.82.06', dutyRate: '10%' },
 
   // Steel Derivatives (Annex I-B?) - Based on Page 2 and Page 13
-  { code: '7216.91.00.10', description: 'Iron or nonalloy steel, angle, shapes and sections nesoi, cold-formed or cold-finished from flat-rolled products, further worked than cold formed or cold-finished', annex: 'Annex I-B', page: 2, category: 'Steel Derivatives', subdivision: '(iv)' },
+  { code: '7216.91.0010', description: 'Iron or nonalloy steel, angle, shapes and sections nesoi, cold-formed or cold-finished from flat-rolled products, further worked than cold formed or cold-finished', annex: 'Annex I-B', page: 2, category: 'Steel Derivatives', subdivision: '(iv)' },
   { code: '7301.20.10', description: 'Iron or nonalloy steel, angles, shapes and sections, welded', annex: 'Annex I-B', page: 2, category: 'Steel Derivatives', subdivision: '(iv)' },
   { code: '7301.20.50', description: 'Alloy steel, angles, shapes and sections of alloy steel, welded', annex: 'Annex I-B', page: 2, category: 'Steel Derivatives', subdivision: '(iv)' },
   { code: '7302.30.00', description: 'Iron or steel, switch blades, crossing frogs, point rods and other crossing pieces, for jointing or fixing rails', annex: 'Annex I-B', page: 2, category: 'Steel Derivatives', subdivision: '(iv)' },
@@ -145,8 +145,8 @@ export const htsData: HTSItem[] = [
   { code: '7607', description: 'Aluminum foil (whether or not printed or backed with paper or other backing materials), not over 0.2 mm (0.0079 in.) thick (excluding any backing)', annex: 'Annex I-A', page: 9, category: 'Aluminum', subdivision: '(i)' },
   { code: '7608', description: 'Aluminum tubes and pipes', annex: 'Annex I-A', page: 9, category: 'Aluminum', subdivision: '(i)' },
   { code: '7609', description: 'Aluminum tube or pipe fittings (including couplings, elbows, and sleeves)', annex: 'Annex I-A', page: 9, category: 'Aluminum', subdivision: '(i)' },
-  { code: '7616.99.51.60', description: 'Aluminum castings', annex: 'Annex I-A', page: 9, category: 'Aluminum', subdivision: '(i)' },
-  { code: '7616.99.51.70', description: 'Aluminum forgings', annex: 'Annex I-A', page: 9, category: 'Aluminum', subdivision: '(i)' },
+  { code: '7616.99.5160', description: 'Aluminum castings', annex: 'Annex I-A', page: 9, category: 'Aluminum', subdivision: '(i)' },
+  { code: '7616.99.5170', description: 'Aluminum forgings', annex: 'Annex I-A', page: 9, category: 'Aluminum', subdivision: '(i)' },
 
   // Copper (Annex I-A?) - Page 10
   { code: '7406.10.00', description: 'Copper, powders of non-lamellar structure', annex: 'Annex I-A', page: 10, category: 'Copper', subdivision: '(v)' },
