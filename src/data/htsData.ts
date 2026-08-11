@@ -1123,7 +1123,6 @@ export const htsData: HTSItem[] = [
   { code: '9903.74.10', description: 'Parts of Medium- and Heavy-Duty Vehicles', annex: 'Proc 10974', page: 1, category: 'MHDV', additionalTariff: '9903.74.08, 9903.74.10, 9903.74.11' },
   { code: '9903.74.11', description: 'Parts of Medium- and Heavy-Duty Vehicles', annex: 'Proc 10974', page: 1, category: 'MHDV', additionalTariff: '9903.74.08, 9903.74.10, 9903.74.11' },
 
-
   // 310 HTS codes from File 2 that were missing from the original HTSItem dataset.
   // Descriptions and source classifications are taken from File 2; first occurrence used for duplicate codes.
   { code: '7216.91.00.10', description: 'Iron or nonalloy steel, angle, shapes and sections nesoi, cold-formed or cold-finished from flat-rolled products, further worked than cold-formed or cold-finished', annex: 'Annex I-A', page: 2, category: 'Steel Derivatives', subdivision: '(iv)' },
